@@ -94,9 +94,8 @@ export class IncomesService {
     const incomesSnapshot = await this.collection
       .where('userId', '==', userId)
       .get();
-    return incomesSnapshot.docs.reduce(
-      (total, doc) => total + doc.data().amount,
-      0,
-    );
+    return incomesSnapshot.docs
+      .filter((item) => !item.paid)
+      .reduce((total, doc) => total + doc.data().amount, 0);
   }
 }
