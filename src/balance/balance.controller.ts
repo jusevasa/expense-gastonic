@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -7,6 +7,7 @@ import {
 } from '@nestjs/swagger';
 
 import { BalanceService } from './balance.service';
+import { errorResponse, successResponse } from '@/utils/response.helper';
 
 @ApiTags('Balance')
 @ApiBearerAuth()
@@ -17,7 +18,16 @@ export class BalanceController {
   @ApiOperation({ summary: 'Get balance for a user' })
   @ApiParam({ name: 'userId', description: 'ID of the user' })
   @Get(':userId')
-  getBalance(@Param('userId') userId: string) {
-    return this.balanceService.getBalance(userId);
+  async getBalance(@Param('userId') userId: string) {
+    try {
+      const balance = await this.balanceService.getBalance(userId);
+      return successResponse('Balance retrieved successfully', balance);
+    } catch (error) {
+      return errorResponse(
+        'Failed to retrieve balance',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        { error: error.message },
+      );
+    }
   }
 }
