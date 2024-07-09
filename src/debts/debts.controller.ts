@@ -82,6 +82,24 @@ export class DebtsController {
     }
   }
 
+  @ApiOperation({ summary: 'Get last debt for a user' })
+  @ApiParam({ name: 'userId', description: 'ID of the user' })
+  @Get(':userId/last')
+  async getLastDebt(@Param('userId') userId: string) {
+    try {
+      const getLastDebt = await this.debtsService.getLastDebt(userId);
+      return successResponse('Found last debt successfully', {
+        getLastDebt,
+      });
+    } catch (error) {
+      return errorResponse(
+        'Failed to retrieve debts',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        { error: error.message },
+      );
+    }
+  }
+
   @ApiOperation({ summary: 'Get a debt by ID' })
   @ApiParam({ name: 'debtId', description: 'ID of the debt' })
   @Get('/debt/:debtId')

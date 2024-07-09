@@ -29,7 +29,6 @@ export class DebtsService {
       date: doc.data().date,
       amount: doc.data().amount,
       description: doc.data().description,
-      userId: doc.data().userId,
     }));
   }
 
@@ -127,5 +126,18 @@ export class DebtsService {
       (total, doc) => total + doc.data().amount,
       0,
     );
+  }
+
+  async getLastDebt(userId: string): Promise<DebtDto> {
+    const debtsSnapshot = await this.collection
+      .where('userId', '==', userId)
+      .orderBy('createdAt', 'desc')
+      .get();
+
+    if (debtsSnapshot.empty) {
+      throw new BadRequestException('Not found');
+    }
+
+    return debtsSnapshot.docs[0].data();
   }
 }
