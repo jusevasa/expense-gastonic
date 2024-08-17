@@ -8,6 +8,7 @@ import { DebtsModule } from '@/debts/debts.module';
 import { FirebaseModule } from '@/firebase/firebase.module';
 import { IncomesModule } from '@/incomes/incomes.module';
 import { TransactionsModule } from '@/transaction/transactions.module';
+import { PaginationModule } from './pagination/pagination.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { TransactionsModule } from '@/transaction/transactions.module';
     FirebaseModule,
     IncomesModule,
     TransactionsModule,
+    PaginationModule,
   ],
   providers: [
     {

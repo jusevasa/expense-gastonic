@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,12 +15,15 @@ import {
   ApiParam,
   ApiBody,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 
 import { successResponse, errorResponse } from '@/utils/response.helper';
 import { DebtsService } from './debts.service';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { UpdateDebtDto } from './dto/update-debt.dto';
+import { PaginationDto } from '@/pagination/dto/pagination.dto';
+import { Order } from '@/pagination/enum/order.enum';
 
 @ApiTags('Debts')
 @ApiBearerAuth()
@@ -27,9 +31,57 @@ import { UpdateDebtDto } from './dto/update-debt.dto';
 export class DebtsController {
   constructor(private readonly debtsService: DebtsService) {}
 
+  @Get(':userId')
+  @ApiParam({
+    name: 'userId',
+    description: 'User ID to filter debts',
+    example: 'user123',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Number of items to return',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number to retrieve',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'order',
+    required: false,
+    description: 'Order to sort the results',
+    example: Order.DESC,
+    enum: Order,
+  })
+  @ApiQuery({
+    name: 'filters',
+    required: false,
+    description: 'Filters to apply to the query',
+    example: '{"field1":"value1"}',
+  })
+  async getDebtsWithFilters(
+    @Param('userId') userId: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    try {
+      paginationDto.userId = userId;
+      const debts = await this.debtsService.getDebtsWithFilters(paginationDto);
+      return successResponse('Debts retrieved successfully', debts);
+    } catch (error) {
+      return errorResponse(
+        'Failed to retrieve debts',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        { error: error.message },
+      );
+    }
+  }
+
   @ApiOperation({ summary: 'Get all debts for a user' })
   @ApiParam({ name: 'userId', description: 'ID of the user' })
-  @Get(':userId')
+  @Get('all/:userId')
   async getAllDebts(@Param('userId') userId: string) {
     try {
       const debts = await this.debtsService.getAllDebts(userId);

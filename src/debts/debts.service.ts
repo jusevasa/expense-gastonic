@@ -9,6 +9,9 @@ import { CreateDebtDto } from './dto/create-debt.dto';
 import { UpdateDebtDto } from './dto/update-debt.dto';
 import { DebtDto } from './dto/debt.dto';
 import { IncomesService } from 'src/incomes/incomes.service';
+import { PaginationService } from '@/pagination/pagination.service';
+import { PaginationDto } from '@/pagination/dto/pagination.dto';
+import { PaginatedResultDto } from '@/pagination/dto/paginated-result.dto';
 
 @Injectable()
 export class DebtsService {
@@ -17,6 +20,7 @@ export class DebtsService {
   constructor(
     private firebaseRepository: FirebaseRepository,
     private incomesService: IncomesService,
+    private paginationService: PaginationService,
   ) {
     this.collection = this.firebaseRepository.getCollection('debts');
   }
@@ -46,6 +50,12 @@ export class DebtsService {
       incomeId: doc.data().incomeId,
       createdAt: doc.data().createdAt,
     };
+  }
+
+  async getDebtsWithFilters(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResultDto<DebtDto>> {
+    return this.paginationService.paginate<DebtDto>('debts', paginationDto);
   }
 
   async getTotalDebtAmountForIncome(incomeId: string): Promise<number> {

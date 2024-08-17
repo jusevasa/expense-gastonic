@@ -1,13 +1,18 @@
-import { Controller, Get, HttpStatus, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import {
   ApiTags,
-  ApiOperation,
   ApiParam,
   ApiBearerAuth,
+  ApiQuery,
+  ApiOkResponse,
 } from '@nestjs/swagger';
 
 import { TransactionsService } from './transactions.service';
-import { errorResponse, successResponse } from '@/utils/response.helper';
+import { Order } from '@/pagination/enum/order.enum';
+import { PaginationDto } from '@/pagination/dto/pagination.dto';
+import { PaginatedResultDto } from '@/pagination/dto/paginated-result.dto';
+import { DebtDto } from '@/debts/dto/debt.dto';
+import { IncomeDto } from '@/incomes/dto/income.dto';
 
 @ApiTags('Transactions')
 @ApiBearerAuth()
@@ -15,21 +20,24 @@ import { errorResponse, successResponse } from '@/utils/response.helper';
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
-  @ApiOperation({
-    summary: 'Get all transactions for a user (incomes and debts)',
-  })
-  @ApiParam({ name: 'userId', description: 'ID of the user' })
   @Get(':userId')
-  async getAllTransactions(@Param('userId') userId: string) {
-    try {
-      const incomes = await this.transactionsService.getTransactions(userId);
-      return successResponse('Transactions retrieved successfully', incomes);
-    } catch (error) {
-      return errorResponse(
-        'Failed to retrieve transactions',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        { error: error.message },
-      );
-    }
+  @ApiParam({ name: 'userId', example: 'user123' })
+  @ApiQuery({ name: 'limit', example: 10, required: false })
+  @ApiQuery({ name: 'page', example: 1, required: false })
+  @ApiQuery({
+    name: 'order',
+    example: Order.DESC,
+    enum: Order,
+    required: false,
+  })
+  @ApiOkResponse({
+    description: 'Successful retrieval of transactions',
+    type: PaginatedResultDto,
+  })
+  async getTransactions(
+    @Param('userId') userId: string,
+    @Query() paginationDto: PaginationDto,
+  ): Promise<PaginatedResultDto<DebtDto | IncomeDto>> {
+    return this.transactionsService.getTransactions(userId, paginationDto);
   }
 }

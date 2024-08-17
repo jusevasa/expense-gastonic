@@ -5,10 +5,11 @@ import { FirebaseModule } from '@/firebase/firebase.module';
 import { DebtsService } from '@/debts/debts.service';
 import { BalanceService } from './balance.service';
 import { BalanceController } from './balance.controller';
+import { PaginationService } from '@/pagination/pagination.service';
 
 @Module({
   imports: [FirebaseModule],
   controllers: [BalanceController],
-  providers: [BalanceService, IncomesService, DebtsService],
+  providers: [BalanceService, IncomesService, DebtsService, PaginationService],
 })
 export class BalanceModule {}
